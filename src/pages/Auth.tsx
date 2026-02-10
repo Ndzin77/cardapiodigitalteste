@@ -125,8 +125,7 @@ export default function Auth() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Apenas usuários cadastrados pelo administrador podem acessar
-            entre em contato: https://instagram.com/n4ndx.77 .
+            Apenas usuários cadastrados pelo administrador podem acessar.
           </p>
         </CardContent>
       </Card>

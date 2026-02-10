@@ -54,7 +54,7 @@ export default function Index() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="h-12 px-6 text-base">
-                <Link to="/loja/doces-da-vivi">
+                <Link to="/loja/sweets">
                   Ver Loja Real
                 </Link>
               </Button>
@@ -74,7 +74,7 @@ export default function Index() {
             
             {/* Floating badge */}
             <div className="absolute -top-4 -right-4 z-20 bg-card px-3 py-1.5 rounded-full shadow-lg border border-border text-sm font-medium text-foreground animate-bounce">
-              ✨ Demonstração Interativa
+              ✨ Demo Interativa
             </div>
           </div>
         </div>
@@ -156,10 +156,10 @@ export default function Index() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <Store className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">cardápio digital</span>
+            <span className="font-semibold text-foreground">Vitrine SaaS</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2026 cardapio digital. Todos os direitos reservados.
+            © 2025 Vitrine SaaS. Todos os direitos reservados.
           </p>
         </div>
       </footer>

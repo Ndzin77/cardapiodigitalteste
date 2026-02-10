@@ -4,6 +4,7 @@ import { useCart } from "@/hooks/useCart";
 import { Plus, Minus, Flame, Clock, Sparkles, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProductCustomizeModal } from "./ProductCustomizeModal";
+import { ProductDetailModal } from "./ProductDetailModal";
 
 interface ProductOption {
   name: string;
@@ -38,6 +39,7 @@ export function MobileProductCard({
 }: MobileProductCardProps) {
   const { items, addItem, updateQuantity } = useCart();
   const [showCustomize, setShowCustomize] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const minQty = Math.max(1, minQuantity);
   
@@ -92,8 +94,8 @@ export function MobileProductCard({
           !product.available ? "opacity-80" : ""
         } ${quantity > 0 ? "ring-2 ring-primary/30" : ""}`}
       >
-        {/* Image Container */}
-        <div className="relative aspect-[4/3] overflow-hidden">
+        {/* Image Container - Clickable for detail */}
+        <div className="relative aspect-[4/3] overflow-hidden cursor-pointer" onClick={() => setShowDetail(true)}>
           <img
             src={product.image}
             alt={product.name}
@@ -254,6 +256,18 @@ export function MobileProductCard({
           <div className="absolute bottom-0 left-0 right-0 h-1 gradient-primary animate-scale-in" />
         )}
       </div>
+
+      {/* Detail Modal */}
+      <ProductDetailModal
+        product={product}
+        open={showDetail}
+        onOpenChange={setShowDetail}
+        hasOptions={hasOptions}
+        options={options}
+        minQuantity={minQty}
+        store={store}
+        unavailableWhatsappEnabled={unavailableWhatsappEnabled}
+      />
 
       {/* Customization Modal */}
       <ProductCustomizeModal

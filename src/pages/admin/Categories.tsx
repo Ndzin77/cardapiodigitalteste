@@ -9,8 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Tag } from "lucide-react";
 import { EmojiPicker } from "@/components/admin/EmojiPicker";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { SortableCategory } from "@/components/admin/SortableCategory";
 
 export default function Categories() {
@@ -25,6 +27,7 @@ export default function Categories() {
   const [formData, setFormData] = useState({
     name: "",
     icon: "🍽️",
+    icon_url: "",
     is_active: true,
   });
 
@@ -43,6 +46,7 @@ export default function Categories() {
     setFormData({
       name: "",
       icon: "🍽️",
+      icon_url: "",
       is_active: true,
     });
     setEditingCategory(null);
@@ -53,6 +57,7 @@ export default function Categories() {
     setFormData({
       name: category.name,
       icon: category.icon || "🍽️",
+      icon_url: (category as any).icon_url || "",
       is_active: category.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -65,7 +70,8 @@ export default function Categories() {
     const categoryData = {
       store_id: store.id,
       name: formData.name,
-      icon: formData.icon,
+      icon: formData.icon_url ? "📷" : formData.icon,
+      icon_url: formData.icon_url || null,
       is_active: formData.is_active,
       sort_order: categories?.length || 0,
     };
@@ -161,10 +167,29 @@ export default function Categories() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <EmojiPicker
-                value={formData.icon}
-                onChange={(emoji) => setFormData({ ...formData, icon: emoji })}
-              />
+              <div className="space-y-2">
+                <Label className="text-sm">Ícone da Categoria</Label>
+                <Tabs defaultValue={formData.icon_url ? "image" : "emoji"} className="w-full">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="emoji" className="text-xs">Emoji</TabsTrigger>
+                    <TabsTrigger value="image" className="text-xs">Foto</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="emoji" className="mt-2">
+                    <EmojiPicker
+                      value={formData.icon}
+                      onChange={(emoji) => setFormData({ ...formData, icon: emoji, icon_url: "" })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="image" className="mt-2">
+                    <ImageUpload
+                      value={formData.icon_url}
+                      onChange={(url) => setFormData({ ...formData, icon_url: url })}
+                      label="Imagem do ícone"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Recomendado: imagem quadrada (ex: 100x100)</p>
+                  </TabsContent>
+                </Tabs>
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm">Nome *</Label>

@@ -423,12 +423,24 @@ export default function Products() {
                     </Badge>
                   )}
                 </div>
-                <Badge 
-                  variant={product.available ? "default" : "secondary"} 
-                  className={`absolute top-2 right-2 text-xs ${product.available ? "bg-success hover:bg-success/90" : ""}`}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!(product as any).stock_enabled) {
+                      updateProduct.mutate({ id: product.id, available: !product.available } as any);
+                    }
+                  }}
+                  className="absolute top-2 right-2"
+                  title={(product as any).stock_enabled ? "Controlado por estoque" : (product.available ? "Clique para desativar" : "Clique para ativar")}
                 >
-                  {product.available ? "Disponível" : "Indisponível"}
-                </Badge>
+                  <Badge 
+                    variant={product.available ? "default" : "secondary"} 
+                    className={`text-xs cursor-pointer transition-opacity hover:opacity-80 ${product.available ? "bg-success hover:bg-success/90" : ""}`}
+                  >
+                    {product.available ? "Disponível" : "Indisponível"}
+                  </Badge>
+                </button>
                 {(product as any).stock_enabled && (
                   <Badge variant="outline" className="absolute bottom-2 right-2 text-xs bg-background/80">
                     Estoque: {(product as any).stock_quantity ?? 0}

@@ -503,56 +503,65 @@ export default function Settings() {
                 />
               </div>
 
-              {/* Instagram and Theme */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="instagram" className="text-sm">Instagram</Label>
-                  <Input
-                    id="instagram"
-                    value={formData.instagram}
-                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                    placeholder="@sualoja"
-                    className="h-10"
-                  />
+              {/* Instagram */}
+              <div className="space-y-2">
+                <Label htmlFor="instagram" className="text-sm">Instagram</Label>
+                <Input
+                  id="instagram"
+                  value={formData.instagram}
+                  onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                  placeholder="@sualoja"
+                  className="h-10"
+                />
+              </div>
+
+              {/* Theme Presets - Full width grid */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Modelo do tema</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {(
+                    [
+                      { id: "pizzaria", label: "🍕 Pizzaria", color: "#d9480f" },
+                      { id: "padaria", label: "🥖 Padaria", color: "#b08968" },
+                      { id: "doceria", label: "🧁 Doceria", color: "#c2255c" },
+                      { id: "churrascaria", label: "🥩 Churrascaria", color: "#111827" },
+                      { id: "hamburgueria", label: "🍔 Hamburgueria", color: "#f59f00" },
+                      { id: "pastelaria", label: "🥟 Pastelaria", color: "#2b8a3e" },
+                    ] as const
+                  ).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setThemePreset(p.id);
+                        const preset = THEME_PRESETS[p.id];
+                        setFormData((prev) => ({ ...prev, theme_color: preset.primary }));
+                        setThemeAccent(preset.accent);
+                        setThemeFontHeading(preset.fontHeading);
+                        setThemeFontBody(preset.fontBody);
+                        setUseCustomHeadingFont(false);
+                        setUseCustomBodyFont(false);
+                      }}
+                      className={`relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 border-2 ${
+                        themePreset === p.id
+                          ? "border-primary bg-primary/10 text-primary shadow-soft ring-1 ring-primary/20"
+                          : "border-border bg-card text-foreground hover:border-muted-foreground/30 hover:bg-muted/50"
+                      }`}
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full shrink-0 border border-border/50"
+                        style={{ backgroundColor: p.color }}
+                      />
+                      <span className="truncate">{p.label}</span>
+                      {themePreset === p.id && (
+                        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      )}
+                    </button>
+                  ))}
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm">Modelo do tema</Label>
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                    {(
-                      [
-                        { id: "pizzaria", label: "Pizzaria" },
-                        { id: "padaria", label: "Padaria" },
-                        { id: "doceria", label: "Doceria" },
-                        { id: "churrascaria", label: "Churrascaria" },
-                        { id: "hamburgueria", label: "Hamburgueria" },
-                        { id: "pastelaria", label: "Pastelaria" },
-                      ] as const
-                    ).map((p) => (
-                      <Button
-                        key={p.id}
-                        type="button"
-                        size="sm"
-                        variant={themePreset === p.id ? "default" : "secondary"}
-                        className="shrink-0"
-                        onClick={() => {
-                          setThemePreset(p.id);
-                          const preset = THEME_PRESETS[p.id];
-                          setFormData((prev) => ({ ...prev, theme_color: preset.primary }));
-                          setThemeAccent(preset.accent);
-                          setThemeFontHeading(preset.fontHeading);
-                          setThemeFontBody(preset.fontBody);
-                          setUseCustomHeadingFont(false);
-                          setUseCustomBodyFont(false);
-                        }}
-                      >
-                        {p.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Escolha um modelo e personalize abaixo (cores e fontes). Você não fica “preso” ao modelo.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Escolha um modelo e personalize abaixo. Você não fica "preso" ao modelo.
+                </p>
               </div>
 
               {/* Palette */}
@@ -922,60 +931,33 @@ export default function Settings() {
 
                         {/* Advanced mode - 2 slots for intervals */}
                         {isAdvanced && (() => {
-                          // Parse intervals: "08:00 - 12:00 / 14:00 - 18:00"
+                          // Lenient parser: extracts time even from partial strings like "14:00 - "
+                          const parseTimeLenient = (raw: string): { open: string; close: string } => {
+                            const times = raw.match(/\d{2}:\d{2}/g) || [];
+                            return { open: times[0] || "", close: times[1] || "" };
+                          };
                           const parseIntervals = (raw: string) => {
                             const parts = raw.split("/").map(p => p.trim());
-                            const slot1 = parseSimpleRange(parts[0] || "");
-                            const slot2 = parseSimpleRange(parts[1] || "");
+                            const slot1 = parseTimeLenient(parts[0] || "");
+                            const slot2 = parseTimeLenient(parts[1] || "");
                             return { slot1, slot2 };
                           };
                           const { slot1, slot2 } = parseIntervals(hour.hours);
 
-                          // State-based approach to avoid losing input on re-render
-                          const handleSlot1OpenChange = (value: string) => {
-                            const current = parseIntervals(hour.hours);
-                            const slot1Str = value && (current.slot1?.close || "") 
-                              ? `${value} - ${current.slot1?.close}` 
-                              : value ? `${value} - ` : "";
-                            const slot2Str = current.slot2?.open && current.slot2?.close 
-                              ? `${current.slot2.open} - ${current.slot2.close}` 
-                              : "";
-                            const combined = [slot1Str, slot2Str].filter(s => s && s !== " - ").join(" / ");
-                            updateOpeningHour(index, "hours", combined || "");
+                          const rebuildHours = (s1: { open: string; close: string }, s2: { open: string; close: string }) => {
+                            const slot1Str = s1.open && s1.close ? `${s1.open} - ${s1.close}` : s1.open ? `${s1.open} - ` : "";
+                            const slot2Str = s2.open && s2.close ? `${s2.open} - ${s2.close}` : s2.open ? `${s2.open} - ` : "";
+                            const parts = [slot1Str, slot2Str].filter(s => s && s.trim() !== "-");
+                            return parts.join(" / ");
                           };
 
-                          const handleSlot1CloseChange = (value: string) => {
+                          const handleSlotChange = (slot: 1 | 2, part: "open" | "close", value: string) => {
                             const current = parseIntervals(hour.hours);
-                            const slot1Str = (current.slot1?.open || "") && value 
-                              ? `${current.slot1?.open} - ${value}` 
-                              : "";
-                            const slot2Str = current.slot2?.open && current.slot2?.close 
-                              ? `${current.slot2.open} - ${current.slot2.close}` 
-                              : "";
-                            const combined = [slot1Str, slot2Str].filter(Boolean).join(" / ");
-                            updateOpeningHour(index, "hours", combined || "");
-                          };
-
-                          const handleSlot2OpenChange = (value: string) => {
-                            const current = parseIntervals(hour.hours);
-                            const slot1Str = current.slot1?.open && current.slot1?.close 
-                              ? `${current.slot1.open} - ${current.slot1.close}` 
-                              : "";
-                            const slot2Str = value ? `${value} - ${current.slot2?.close || ""}` : "";
-                            const combined = [slot1Str, slot2Str].filter(s => s && s !== " - ").join(" / ");
-                            updateOpeningHour(index, "hours", combined || slot1Str);
-                          };
-
-                          const handleSlot2CloseChange = (value: string) => {
-                            const current = parseIntervals(hour.hours);
-                            const slot1Str = current.slot1?.open && current.slot1?.close 
-                              ? `${current.slot1.open} - ${current.slot1.close}` 
-                              : "";
-                            const slot2Str = (current.slot2?.open || "") && value 
-                              ? `${current.slot2?.open} - ${value}` 
-                              : "";
-                            const combined = [slot1Str, slot2Str].filter(Boolean).join(" / ");
-                            updateOpeningHour(index, "hours", combined || slot1Str);
+                            const s1 = { ...current.slot1 };
+                            const s2 = { ...current.slot2 };
+                            if (slot === 1) s1[part] = value;
+                            else s2[part] = value;
+                            updateOpeningHour(index, "hours", rebuildHours(s1, s2));
                           };
 
                           return (
@@ -1000,17 +982,17 @@ export default function Settings() {
                                 <div className="flex items-center gap-2">
                                   <Input
                                     type="time"
-                                    defaultValue={slot1?.open || ""}
-                                    onBlur={(e) => handleSlot1OpenChange(e.target.value)}
-                                    onChange={(e) => handleSlot1OpenChange(e.target.value)}
+                                    key={`${hour.day}-s1o-${slot1.open}`}
+                                    defaultValue={slot1.open}
+                                    onChange={(e) => handleSlotChange(1, "open", e.target.value)}
                                     className="h-9 text-sm flex-1"
                                   />
                                   <span className="text-xs text-muted-foreground shrink-0">até</span>
                                   <Input
                                     type="time"
-                                    defaultValue={slot1?.close || ""}
-                                    onBlur={(e) => handleSlot1CloseChange(e.target.value)}
-                                    onChange={(e) => handleSlot1CloseChange(e.target.value)}
+                                    key={`${hour.day}-s1c-${slot1.close}`}
+                                    defaultValue={slot1.close}
+                                    onChange={(e) => handleSlotChange(1, "close", e.target.value)}
                                     className="h-9 text-sm flex-1"
                                   />
                                 </div>
@@ -1021,19 +1003,17 @@ export default function Settings() {
                                 <div className="flex items-center gap-2">
                                   <Input
                                     type="time"
-                                    key={`${hour.day}-slot2-open-${slot2?.open || ""}`}
-                                    defaultValue={slot2?.open || ""}
-                                    onBlur={(e) => handleSlot2OpenChange(e.target.value)}
-                                    onChange={(e) => handleSlot2OpenChange(e.target.value)}
+                                    key={`${hour.day}-s2o-${slot2.open}`}
+                                    defaultValue={slot2.open}
+                                    onChange={(e) => handleSlotChange(2, "open", e.target.value)}
                                     className="h-9 text-sm flex-1"
                                   />
                                   <span className="text-xs text-muted-foreground shrink-0">até</span>
                                   <Input
                                     type="time"
-                                    key={`${hour.day}-slot2-close-${slot2?.close || ""}`}
-                                    defaultValue={slot2?.close || ""}
-                                    onBlur={(e) => handleSlot2CloseChange(e.target.value)}
-                                    onChange={(e) => handleSlot2CloseChange(e.target.value)}
+                                    key={`${hour.day}-s2c-${slot2.close}`}
+                                    defaultValue={slot2.close}
+                                    onChange={(e) => handleSlotChange(2, "close", e.target.value)}
                                     className="h-9 text-sm flex-1"
                                   />
                                 </div>
@@ -1190,6 +1170,16 @@ export default function Settings() {
         {/* WhatsApp Tab */}
         <TabsContent value="whatsapp">
           <div className="space-y-4 sm:space-y-6">
+            {/* Info banner */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/10 border border-accent/20">
+              <span className="text-2xl shrink-0">✅</span>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Tudo já está configurado!</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  As mensagens de pedido e dúvidas já funcionam automaticamente. Você <strong>não precisa editar nada</strong> — mas se quiser personalizar, é só alterar abaixo.
+                </p>
+              </div>
+            </div>
             <Tabs defaultValue="order" className="space-y-4">
               <TabsList className="w-full h-auto p-1 flex overflow-x-auto no-scrollbar">
                 <TabsTrigger value="order" className="flex-1 min-w-fit gap-1.5 px-2 sm:px-3 py-2 text-xs sm:text-sm">

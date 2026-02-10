@@ -1,18 +1,50 @@
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Search, X, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Product } from "@/types/store";
 
 interface ProductSearchProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  products?: Product[];
+  onProductClick?: (productId: string, categoryId: string) => void;
 }
 
-export function ProductSearch({ value, onChange, placeholder = "O que você procura?" }: ProductSearchProps) {
+export function ProductSearch({ 
+  value, 
+  onChange, 
+  placeholder = "O que você procura?",
+  products = [],
+  onProductClick,
+}: ProductSearchProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Live search results
+  const searchResults = useMemo(() => {
+    if (!value.trim() || products.length === 0) return [];
+    const q = value.toLowerCase().trim();
+    return products
+      .filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [value, products]);
+
+  const showResults = isFocused && value.trim().length > 0;
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
-    <div className={`relative transition-all duration-300 ${isFocused ? "scale-[1.01]" : ""}`}>
+    <div ref={containerRef} className={`relative transition-all duration-300 ${isFocused ? "scale-[1.01]" : ""}`}>
       {/* Glow effect when focused */}
       {isFocused && (
         <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl -z-10 animate-pulse" />
@@ -31,7 +63,6 @@ export function ProductSearch({ value, onChange, placeholder = "O que você proc
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           className={`pl-12 pr-12 h-14 rounded-2xl text-base font-medium transition-all duration-300 shadow-soft ${
             isFocused 
@@ -48,6 +79,46 @@ export function ProductSearch({ value, onChange, placeholder = "O que você proc
           </button>
         )}
       </div>
+
+      {/* Live search dropdown */}
+      {showResults && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-2xl shadow-elevation z-50 overflow-hidden animate-slide-up">
+          {searchResults.length > 0 ? (
+            <div className="py-2">
+              {searchResults.map((product, idx) => (
+                <button
+                  key={product.id}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    onProductClick?.(product.id, product.category);
+                    setIsFocused(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-all duration-200 animate-fade-in"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-12 h-12 rounded-xl object-cover shadow-soft shrink-0"
+                  />
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="font-semibold text-sm text-foreground truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{product.description}</p>
+                  </div>
+                  <span className="text-sm font-bold text-primary shrink-0">
+                    R$ {product.price.toFixed(2).replace(".", ",")}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="py-6 text-center animate-fade-in">
+              <span className="text-2xl mb-2 block">🔍</span>
+              <p className="text-sm text-muted-foreground">Nenhum produto encontrado</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

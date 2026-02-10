@@ -17,6 +17,7 @@ import { DeveloperWatermarks, FooterDeveloperBadge } from "@/components/Develope
 import { StoreInfo, Category, Product, ProductOption } from "@/types/store";
 import { sanitizeProductOptions } from "@/lib/sanitizeProductOptions";
 import { applyThemeToDocument, parseThemeColorField } from "@/lib/storeTheme";
+import { isStoreOpenNow } from "@/lib/storeOpenStatus";
 
 interface ProductWithOptions extends Product {
   hasOptions?: boolean;
@@ -37,11 +38,12 @@ export default function PublicStorefront() {
 
   // Add "Destaques" category at the beginning
   const categories: Category[] = [
-    { id: "featured", name: "Destaques", icon: "⭐" },
+    { id: "featured", name: "Cardápio", icon: "📋" },
     ...(dbCategories?.filter(c => c.is_active).map(c => ({
       id: c.id,
       name: c.name,
       icon: c.icon || "🍽️",
+      icon_url: (c as any).icon_url || undefined,
     })) || []),
   ];
 
@@ -97,7 +99,7 @@ export default function PublicStorefront() {
     minOrder: Number(store.min_order) || 0,
     estimatedTime: store.estimated_time || "30-45 min",
     acceptedPayments: store.accepted_payments || [],
-    isOpen: store.is_open ?? true,
+    isOpen: isStoreOpenNow((store.opening_hours as any[])?.map(h => ({ day: h.day, hours: h.hours, isOpen: h.isOpen ?? h.is_open ?? true })) || []),
     rating: (store as any).rating || 4.8,
     reviewCount: (store as any).review_count || 0,
     checkoutLink: (store as any).checkout_link || undefined,
@@ -155,6 +157,7 @@ export default function PublicStorefront() {
                 activeCategory={activeCategory}
                 store={storeInfo}
                 unavailableWhatsappEnabled={true}
+                onCategoryChange={setActiveCategory}
               />
               <StoreFooter store={storeInfo} />
               <FooterDeveloperBadge />

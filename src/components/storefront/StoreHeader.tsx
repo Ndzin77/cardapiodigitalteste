@@ -46,14 +46,14 @@ export function StoreHeader({ store, storeId }: StoreHeaderProps) {
       </div>
 
       {/* Store Info Card - Premium Glass Design */}
-      <div className="container relative -mt-24 sm:-mt-28 md:-mt-36 px-3 sm:px-4 z-10">
-        <div className="glass rounded-3xl shadow-elevation p-5 sm:p-6 md:p-8 animate-slide-up border border-white/30">
+      <div className="container relative -mt-20 sm:-mt-28 md:-mt-36 px-3 sm:px-4 z-10">
+        <div className="glass rounded-2xl sm:rounded-3xl shadow-elevation p-4 sm:p-6 md:p-8 animate-slide-up border border-white/30">
           <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
             
             {/* Logo with glow effect */}
             <div className="relative group mx-auto md:mx-0">
-              <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl bg-white flex items-center justify-center overflow-hidden shadow-strong border-4 border-white/80 transition-transform duration-300 group-hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-primary/30 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-xl sm:rounded-2xl bg-white flex items-center justify-center overflow-hidden shadow-strong border-3 sm:border-4 border-white/80 transition-transform duration-300 group-hover:scale-[1.02]">
                 {store.logo && store.logo !== "/placeholder.svg" ? (
                   <img src={store.logo} alt={store.name} className="w-full h-full object-cover" loading="eager" />
                 ) : (
@@ -65,8 +65,8 @@ export function StoreHeader({ store, storeId }: StoreHeaderProps) {
             {/* Main Info */}
             <div className="flex-1 text-center md:text-left">
               {/* Store Name & Status */}
-              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3 mb-3">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground font-display tracking-tight">
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-foreground font-display tracking-tight leading-tight">
                   {store.name}
                 </h1>
                 <Badge
@@ -283,7 +283,7 @@ export function StoreHeader({ store, storeId }: StoreHeaderProps) {
           </div>
 
           {/* Mobile Delivery Info */}
-          <div className="md:hidden mt-5 grid grid-cols-2 gap-3">
+          <div className="md:hidden mt-4 grid grid-cols-2 gap-2 sm:gap-3">
             {store.deliveryEnabled !== false && (
               <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border border-primary/10">
                 <div className="text-xs text-muted-foreground mb-1">Taxa de entrega</div>

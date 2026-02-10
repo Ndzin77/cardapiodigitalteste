@@ -24,7 +24,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
-  const [urlMode, setUrlMode] = useState(!value || value.startsWith("http"));
+  const [urlMode, setUrlMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const aspectClasses = {

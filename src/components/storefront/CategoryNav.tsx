@@ -109,9 +109,13 @@ export function CategoryNav({
                 )}
                 
                 {/* Icon with enhanced styling */}
-                <span className={`text-xl transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`}>
-                  {category.icon}
-                </span>
+                {category.icon_url ? (
+                  <img src={category.icon_url} alt="" className={`w-6 h-6 rounded-md object-cover transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`} />
+                ) : (
+                  <span className={`text-xl transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`}>
+                    {category.icon}
+                  </span>
+                )}
                 <span className="tracking-tight">{category.name}</span>
                 
                 {/* Active indicator dot */}

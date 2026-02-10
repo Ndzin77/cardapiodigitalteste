@@ -54,8 +54,12 @@ export function SortableCategory({
           >
             <GripVertical className="w-5 h-5" />
           </div>
-          <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0">
-            {category.icon}
+          <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+            {(category as any).icon_url ? (
+              <img src={(category as any).icon_url} alt={category.name} className="w-full h-full object-cover" />
+            ) : (
+              category.icon
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
